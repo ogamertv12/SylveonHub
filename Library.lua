@@ -1,5 +1,5 @@
 if game:GetService("CoreGui"):FindFirstChild("ScreenGui") then
-    game:GetService("CoreGui"):FindFirstChild("ScreenGui"):Destroy()
+    Unload()
 end
 
 local InputService = game:GetService('UserInputService');
@@ -28,7 +28,6 @@ getgenv().Toggles = Toggles;
 getgenv().Options = Options;
 
 local Library = {
-    flags = {};
     Registry = {};
     RegistryMap = {};
 
@@ -70,28 +69,28 @@ table.insert(Library.Signals, RenderStepped:Connect(function(Delta)
     end
 end))
 
-local function GetFolder()
+local function GetFolder(FileName)
     if not isfolder("SylveonHub/settings") then 
         makefolder("SylveonHub/settings")
     end
-    if not isfile("SylveonHub/settings/" .. LocalPlayer.UserId .. ".json") then 
-        writefile("SylveonHub/settings/" .. LocalPlayer.UserId .. ".json", tostring(HttpService:JSONEncode({})))
+    if not isfile("SylveonHub/settings/" .. FileName .. " - " .. LocalPlayer.UserId .. ".json") then 
+        writefile("SylveonHub/settings/" .. FileName .. " - " .. LocalPlayer.UserId .. ".json", tostring(HttpService:JSONEncode({})))
     end
 end
 
-local function GetSetting(Idx)
-    local content = readfile("SylveonHub/settings/" .. LocalPlayer.UserId .. ".json")
+local function GetSetting(Idx, FileName)
+    local content = readfile("SylveonHub/settings/" .. FileName .. " - " .. LocalPlayer.UserId .. ".json")
     local parsed = HttpService:JSONDecode(content)
     if parsed then 
         return parsed[Idx]
     end
 end
 
-local function AddSetting(Idx, value)
-    local content = readfile("SylveonHub/settings/" .. LocalPlayer.UserId .. ".json")
+local function AddSetting(Idx, value, FileName)
+    local content = readfile("SylveonHub/settings/" .. FileName .. " - " .. LocalPlayer.UserId .. ".json")
     local parsed = HttpService:JSONDecode(content)
     parsed[Idx] = value 
-    writefile("SylveonHub/settings/" .. LocalPlayer.UserId .. ".json", tostring(HttpService:JSONEncode(parsed)))
+    writefile("SylveonHub/settings/" .. FileName .. " - " .. LocalPlayer.UserId .. ".json", tostring(HttpService:JSONEncode(parsed)))
 end
 
 local function GetPlayersString()
@@ -371,7 +370,7 @@ function Library:GiveSignal(Signal)
     table.insert(Library.Signals, Signal)
 end
 
-function Library:Unload()
+getgenv().Unload = function ()
     -- Unload all of the signals
     for Idx = #Library.Signals, 1, -1 do
         local Connection = table.remove(Library.Signals, Idx)
@@ -1509,7 +1508,12 @@ do
             Finished = Info.Finished or false;
             Type = 'Input';
             Callback = Info.Callback or function(Value) end;
+            Save = Info.Save or false;
         };
+        local setting
+        if Textbox.Save then
+            setting = GetSetting(Idx, Library.FileName) or Textbox.Value
+        end
 
         local Groupbox = self;
         local Container = Groupbox.Container;
@@ -1611,6 +1615,9 @@ do
 
             Library:SafeCallback(Textbox.Callback, Textbox.Value);
             if Textbox.Changed then
+                if Textbox.Save then
+                    AddSetting(Idx, Textbox.Value, Library.FileName)
+                end
                 Textbox.Changed(Textbox.Value)
             end;
         end;
@@ -1676,6 +1683,10 @@ do
             Func(Textbox.Value);
         end;
 
+        Textbox:OnChanged(function() end)
+        if Textbox.Save then
+            Textbox:SetValue(setting)
+        end
         Groupbox:AddBlank(5);
         Groupbox:Resize();
 
@@ -1693,7 +1704,7 @@ do
             Addons = {},
             Risky = Info.Risky,
         };
-        local setting = GetSetting(Idx) or Info.Default
+        local setting = GetSetting(Idx, Library.FileName) or Toggle.Value
         -- setting = setting == "true" and true or false
         -- setting = setting or Info.Default
 
@@ -1795,7 +1806,7 @@ do
 
             Library:SafeCallback(Toggle.Callback, Toggle.Value);
             if Toggle.Changed then
-                AddSetting(Idx, Toggle.Value)
+                AddSetting(Idx, Toggle.Value, Library.FileName)
                 Toggle.Changed(Toggle.Value)
             end;
         end;
@@ -1840,7 +1851,7 @@ do
             Type = 'Slider';
             Callback = Info.Callback or function(Value) end;
         };
-        local setting = GetSetting(Idx) or Info.Default
+        local setting = GetSetting(Idx, Library.FileName) or Slider.Value
 
         local Groupbox = self;
         local Container = Groupbox.Container;
@@ -2004,7 +2015,7 @@ do
                     if nValue ~= OldValue then
                         Library:SafeCallback(Slider.Callback, Slider.Value);
                         if Slider.Changed then
-                            AddSetting(Idx, Slider.Value)
+                            AddSetting(Idx, Slider.Value, Library.FileName)
                             Slider.Changed(Slider.Value)
                         end;
                     end;
@@ -2044,7 +2055,7 @@ do
             SpecialType = Info.SpecialType; -- can be either 'Player' or 'Team'
             Callback = Info.Callback or function(Value) end;
         };
-        setting = GetSetting(Idx)
+        local setting = GetSetting(Idx, Library.FileName)
 
         local Groupbox = self;
         local Container = Groupbox.Container;
@@ -2319,7 +2330,7 @@ do
 
                             Library:SafeCallback(Dropdown.Callback, Dropdown.Value);
                             if Dropdown.Changed then
-                                AddSetting(Idx, Dropdown.Value)
+                                AddSetting(Idx, Dropdown.Value, Library.FileName)
                                 Dropdown.Changed(Dropdown.Value)
                             end;
 
@@ -2446,7 +2457,9 @@ do
         end
 
         Dropdown:OnChanged(function() end);
-        Dropdown:SetValue(setting);
+        if setting then
+            Dropdown:SetValue(setting);
+        end
         Groupbox:AddBlank(Info.BlankSize or 5);
         Groupbox:Resize();
 
@@ -2716,7 +2729,6 @@ function Library:Notify(Text, Time)
 end;
 
 function Library:CreateWindow(...)
-    GetFolder()
     local Arguments = { ... }
     local Config = { AnchorPoint = Vector2.zero }
 
@@ -2728,6 +2740,8 @@ function Library:CreateWindow(...)
     end
 
     if type(Config.Title) ~= 'string' then Config.Title = 'No title' end
+    if Config.FileName then Library.FileName = Config.FileName end
+    GetFolder(Library.FileName)
 
     if typeof(Config.Position) ~= 'UDim2' then Config.Position = UDim2.fromOffset(175, 50) end
     if typeof(Config.Size) ~= 'UDim2' then Config.Size = UDim2.fromOffset(550, 600) end
