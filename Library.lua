@@ -2307,7 +2307,7 @@ do
                                 Selected = Try;
 
                                 if Selected then
-                                    Dropdown.Value[Value] = true;
+                                    Dropdown.Value[Value] = Value;
                                 else
                                     Dropdown.Value[Value] = nil;
                                 end;
@@ -2375,7 +2375,7 @@ do
 
                 for Value, Bool in next, Val do
                     if table.find(Dropdown.Values, Value) then
-                        nTable[Value] = true
+                        nTable[Value] = Value -- asdasd
                     end;
                 end;
 
@@ -2444,7 +2444,7 @@ do
             for i = 1, #Defaults do
                 local Index = Defaults[i]
                 if Info.Multi then
-                    Dropdown.Value[Dropdown.Values[Index]] = true
+                    Dropdown.Value[Dropdown.Values[Index]] = Dropdown.Values[Index] -- asdasd
                 else
                     Dropdown.Value = Dropdown.Values[Index];
                 end
