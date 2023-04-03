@@ -42,7 +42,7 @@ local function MoveTo(self)
 		self._humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
 	end
 
-	while (self._agent.HumanoidRootPart.Position - self._waypoints[self._currentWaypoint].Position).magnitude > 5 and self._toggle do
+	while (self._agent.HumanoidRootPart.Position - self._waypoints[self._currentWaypoint].Position).magnitude > 5 do
 		self._humanoid:Move((self._waypoints[self._currentWaypoint].Position - self._agent.HumanoidRootPart.Position).Unit, false)
 		RunService.RenderStepped:Wait()
 	end
@@ -75,7 +75,7 @@ function moveToFinished(self, reached)
 	end
 end
 
-function Path.new(agent, agentParameters, toggle)
+function Path.new(agent, agentParameters)
 	if not (agent and agent:IsA("Model") and agent.HumanoidRootPart) then
 		output(error, "Pathfinding agent must be a valid Model Instance with a set HumanoidRootPart.")
 	end
@@ -83,7 +83,6 @@ function Path.new(agent, agentParameters, toggle)
 		_agent = agent;
 		_humanoid = agent:FindFirstChildOfClass("Humanoid");
 		_path = PathfindingService:CreatePath(agentParameters);
-		_toggle = toggle;
 		_position = {
 			_last = Vector3.new();
 			_count = 0;
@@ -141,3 +140,13 @@ function Path:Run(target)
 end
 
 return Path
+
+
+-- local characterPathing = Path.new(game:GetService("Players").LocalPlayer.Character, { 
+-- 	AgentRadius = 3, 
+-- 	AgentHeight = 4, 
+-- 	AgentCanJump = true, 
+-- 	WaypointSpacing = 4.2
+-- }, true);
+
+-- characterPathing:Run(Vector3.new(0.0001282117736991495, 3.007530927658081, 0.4933149814605713))
