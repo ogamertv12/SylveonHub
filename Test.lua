@@ -83,7 +83,7 @@ function Path.new(agent, agentParameters, toggle)
 		_agent = agent;
 		_humanoid = agent:FindFirstChildOfClass("Humanoid");
 		_path = PathfindingService:CreatePath(agentParameters);
-		_toggle = toggle
+		_toggle = toggle;
 		_position = {
 			_last = Vector3.new();
 			_count = 0;
