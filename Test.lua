@@ -125,6 +125,7 @@ function Path:Run(target)
 
 		task.spawn(function()
             while task.wait(0.5) and Path.Status.CurrentlyPathing do
+				print((self._agent.HumanoidRootPart.Velocity).Magnitude)
                 if (self._agent.HumanoidRootPart.Velocity).Magnitude < 0.07 then
                     self._agent:PivotTo(CFrame.new(self._waypoints[self._currentWaypoint].Position + Vector3.new(0,4,0)))
                     MoveTo(self)
