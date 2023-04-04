@@ -46,6 +46,7 @@ local function MoveTo(self)
 		self._humanoid:Move((self._waypoints[self._currentWaypoint].Position - self._agent.HumanoidRootPart.Position).Unit, false)
 		RunService.RenderStepped:Wait()
 	end
+	print((self._agent.HumanoidRootPart.Velocity).Magnitude)
 	-- if self._currentWaypoint + 1 <= #self._waypoints then
 	-- 	if (self._agent.HumanoidRootPart.Velocity).Magnitude < 0.07 then
 	-- 		print("[1] Stuck Teleport next")
@@ -79,7 +80,6 @@ function moveToFinished(self, reached)
 
 	if reached and self._currentWaypoint + 1 <= #self._waypoints then
 		self._currentWaypoint += 1
-		print((self._agent.HumanoidRootPart.Velocity).Magnitude)
 		MoveTo(self)
 	end
 end
@@ -100,6 +100,7 @@ function Path.new(agent, agentParameters)
 
 	self._path.Blocked:Connect(function(...)
 		if (self._currentWaypoint <= ... and self._currentWaypoint + 1 >= ...) and self._humanoid then
+			print("Jump", ...)
 			self._humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
 		end
 	end)
