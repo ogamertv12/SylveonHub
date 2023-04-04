@@ -42,7 +42,7 @@ local function MoveTo(self)
 		self._humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
 	end
 
-	while (self._agent.HumanoidRootPart.Position - self._waypoints[self._currentWaypoint].Position).magnitude > 5 and self._toggleMove do
+	while (self._agent.HumanoidRootPart.Position - self._waypoints[self._currentWaypoint].Position).magnitude > 5 and self.ToggleMove do
 		self._humanoid:Move((self._waypoints[self._currentWaypoint].Position - self._agent.HumanoidRootPart.Position).Unit, false)
 		RunService.RenderStepped:Wait()
 	end
@@ -75,7 +75,7 @@ function moveToFinished(self, reached)
 	end
 end
 
-function Path.new(agent, agentParameters, toggleMove)
+function Path.new(agent, agentParameters)
 	if not (agent and agent:IsA("Model") and agent.HumanoidRootPart) then
 		output(error, "Pathfinding agent must be a valid Model Instance with a set HumanoidRootPart.")
 	end
@@ -83,7 +83,6 @@ function Path.new(agent, agentParameters, toggleMove)
 		_agent = agent;
 		_humanoid = agent:FindFirstChildOfClass("Humanoid");
 		_path = PathfindingService:CreatePath(agentParameters);
-		_toggleMove = toggleMove;
 		_position = {
 			_last = Vector3.new();
 			_count = 0;
