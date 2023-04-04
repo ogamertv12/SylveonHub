@@ -46,6 +46,11 @@ local function MoveTo(self)
 		self._humanoid:Move((self._waypoints[self._currentWaypoint].Position - self._agent.HumanoidRootPart.Position).Unit, false)
 		RunService.RenderStepped:Wait()
 	end
+	if (self._agent.HumanoidRootPart.Velocity).Magnitude < 0.07 then
+		print("Teleport")
+	elseif (self._agent.HumanoidRootPart.Velocity).Magnitude > 1 and (self._agent.HumanoidRootPart.Velocity).Magnitude < 10 then
+		print("Teleport [2]")
+	end
 	moveToFinished(self, true)
 end
 
@@ -69,6 +74,7 @@ end
 
 function moveToFinished(self, reached)
 	if not getmetatable(self) then return end
+
 	if reached and self._currentWaypoint + 1 <= #self._waypoints  then
 		self._currentWaypoint += 1
 		MoveTo(self)
@@ -127,7 +133,6 @@ function Path:Run(target)
 		local stuck
 		if self._humanoid then
 			stuck = comparePosition(self)
-			print(stuck)
 		end
 
 		if self._humanoid then
