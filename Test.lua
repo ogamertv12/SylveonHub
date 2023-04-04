@@ -79,7 +79,7 @@ function moveToFinished(self, reached)
 
 	if reached and self._currentWaypoint + 1 <= #self._waypoints then
 		self._currentWaypoint += 1
-		print(self._agent.HumanoidRootPart.Velocity)
+		print((self._agent.HumanoidRootPart.Velocity).Magnitude)
 		MoveTo(self)
 	end
 end
