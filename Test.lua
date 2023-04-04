@@ -69,6 +69,7 @@ function moveToFinished(self, reached)
 		self._currentWaypoint += 1
 		MoveTo(self)
 	elseif self._currentWaypoint >= #self._waypoints then
+		print("Stop", self._currentWaypoint, #self._waypoints)
         Path.Status.CurrentlyPathing = false
 	end
 end
