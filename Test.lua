@@ -129,10 +129,10 @@ function Path:Run(target)
 				print((self._agent.HumanoidRootPart.Velocity).Magnitude)
                 if (self._agent.HumanoidRootPart.Velocity).Magnitude < 0.07 then
                     self._agent:PivotTo(CFrame.new(self._waypoints[self._currentWaypoint].Position + Vector3.new(0,4,0)))
-                    MoveTo(self)
+                    -- MoveTo(self)
                 elseif (self._agent.HumanoidRootPart.Velocity).Magnitude > 1 and (self._agent.HumanoidRootPart.Velocity).Magnitude < 10 then
                     self._agent:PivotTo(CFrame.new(self._waypoints[self._currentWaypoint].Position + Vector3.new(0,4,0)))
-                    MoveTo(self)
+                    -- MoveTo(self)
                 end
             end
         end)
