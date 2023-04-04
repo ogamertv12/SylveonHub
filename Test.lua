@@ -9,7 +9,11 @@ VisualFolder.Name = "PathVisuals"
 local function output(func, msg)
 	func(((func == error and "SimplePath Error: ") or "SimplePath: ")..msg)
 end
-local Path = {}
+local Path = {
+	Status = {
+        CurrentlyPathing = false,
+    }
+}
 Path.__index = function(table, index)
 	if index == "Stopped" and not table._humanoid then
 		output(error, "Attempt to use Path.Stopped on a non-humanoid.")
@@ -46,24 +50,7 @@ local function MoveTo(self)
 		self._humanoid:Move((self._waypoints[self._currentWaypoint].Position - self._agent.HumanoidRootPart.Position).Unit, false)
 		RunService.RenderStepped:Wait()
 	end
-	print((self._agent.HumanoidRootPart.Velocity).Magnitude)
-	-- if self._currentWaypoint + 1 <= #self._waypoints then
-	-- 	if (self._agent.HumanoidRootPart.Velocity).Magnitude < 0.07 then
-	-- 		print("[1] Stuck Teleport next")
-	-- 	elseif (self._agent.HumanoidRootPart.Velocity).Magnitude > 1 and (self._agent.HumanoidRootPart.Velocity).Magnitude < 10 then
-	-- 		print("[2] Stuck Teleport next")
-	-- 	end
-	-- end
 	moveToFinished(self, true)
-end
-
-local function comparePosition(self)
-	if self._currentWaypoint == #self._waypoints then return end
-	self._position._count = ((self._agent.HumanoidRootPart.Position - self._position._last).Magnitude <= 0.07 and (self._position._count + 1)) or 0
-	self._position._last = self._agent.HumanoidRootPart.Position
-	if self._position._count >= 1 then
-		self._humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-	end
 end
 
 function getNonHumanoidWaypoint(self)
@@ -81,6 +68,8 @@ function moveToFinished(self, reached)
 	if reached and self._currentWaypoint + 1 <= #self._waypoints then
 		self._currentWaypoint += 1
 		MoveTo(self)
+	elseif self._currentWaypoint >= #self._waypoints then
+        Path.Status.CurrentlyPathing = false
 	end
 end
 
@@ -100,7 +89,6 @@ function Path.new(agent, agentParameters)
 
 	self._path.Blocked:Connect(function(...)
 		if (self._currentWaypoint <= ... and self._currentWaypoint + 1 >= ...) and self._humanoid then
-			print("Jump", ...)
 			self._humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
 		end
 	end)
@@ -122,6 +110,7 @@ function Path:Run(target)
 		self._waypoints = self._path:GetWaypoints()
 		self._pre = self._waypoints[1]
 		self._currentWaypoint = 2
+        Path.Status.CurrentlyPathing = true
 
 		if self.Visualize then
 			for _,v in pairs(self._waypoints) do
@@ -134,10 +123,17 @@ function Path:Run(target)
 			end
 		end
 
-		local stuck
-		if self._humanoid then
-			stuck = comparePosition(self)
-		end
+		task.spawn(function()
+            while task.wait(0.5) and Path.Status.CurrentlyPathing do
+                if (self._agent.HumanoidRootPart.Velocity).Magnitude < 0.07 then
+                    self._agent:PivotTo(CFrame.new(self._waypoints[self._currentWaypoint].Position + Vector3.new(0,4,0)))
+                    MoveTo(self)
+                elseif (self._agent.HumanoidRootPart.Velocity).Magnitude > 1 and (self._agent.HumanoidRootPart.Velocity).Magnitude < 10 then
+                    self._agent:PivotTo(CFrame.new(self._waypoints[self._currentWaypoint].Position + Vector3.new(0,4,0)))
+                    MoveTo(self)
+                end
+            end
+        end)
 
 		if self._humanoid then
 			MoveTo(self)
