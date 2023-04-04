@@ -127,6 +127,7 @@ function Path:Run(target)
 		local stuck
 		if self._humanoid then
 			stuck = comparePosition(self)
+			print(stuck)
 		end
 
 		if self._humanoid then
