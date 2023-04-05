@@ -103,10 +103,6 @@ function Path:Run(target)
 		self._path:ComputeAsync(self._agent.HumanoidRootPart.Position, (typeof(target) == "Vector3" and target) or target.Position)
 	end)
 	if pathComputed and self._path.Status == Enum.PathStatus.Success then
-		pcall(function()
-			self._agent.HumanoidRootPart:SetNetworkOwner(nil)
-		end)
-
 		self._waypoints = self._path:GetWaypoints()
 		self._pre = self._waypoints[1]
 		self._currentWaypoint = 2
@@ -127,10 +123,8 @@ function Path:Run(target)
             while task.wait(0.5) and Path.Status.CurrentlyPathing do
                 if (self._agent.HumanoidRootPart.Velocity).Magnitude < 0.07 then
                     self._agent:PivotTo(CFrame.new(self._waypoints[self._currentWaypoint].Position + Vector3.new(0,4,0)))
-                    -- MoveTo(self)
                 elseif (self._agent.HumanoidRootPart.Velocity).Magnitude > 1 and (self._agent.HumanoidRootPart.Velocity).Magnitude < 10 then
                     self._agent:PivotTo(CFrame.new(self._waypoints[self._currentWaypoint].Position + Vector3.new(0,4,0)))
-                    -- MoveTo(self)
                 end
             end
         end)
