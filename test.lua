@@ -214,7 +214,7 @@ function library:Window(name)
     RemoveCorner.BackgroundColor3 = Color3.fromRGB(42, 36, 45)
     RemoveCorner.BorderSizePixel = 0
     RemoveCorner.Size = UDim2.new(0, 6, 0, 445)
-    -- MakeDraggable(TopFrame, MainFrame)
+    MakeDraggable(TopFrame, MainFrame)
 
     local opened = true
     UserInputService.InputBegan:Connect(function(input)
